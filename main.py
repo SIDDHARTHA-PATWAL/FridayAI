@@ -11,6 +11,10 @@ import os
 import win32com.client
 from gtts import gTTS
 speaker=win32com.client.Dispatch("SAPI.SpVoice")
+
+import openai
+from config import apikey
+openai.api_key = apikey
 def say(text):
     speaker.Voice = speaker.GetVoices("Language=409;Gender=Female").Item(0)
     speaker.Speak(f" {text}")
@@ -19,10 +23,33 @@ def say(text):
     # os.system('start output.mp3')
     # #os.remove('output.mp3')
     #os.system(f"say {text}")
+
+def ai(message):
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {
+                "role": "user",
+                "content": message
+            },
+            {
+                "role": "assistant",
+                "content": "Hi there! How can I assist you today?"
+            }
+        ],
+        temperature=1,
+        max_tokens=256,
+        top_p=1,
+        frequency_penalty=0,
+        presence_penalty=0
+    )
+    print(response["choices"][0]["message"]["content"])
+    say(response["choices"][0]["message"]["content"])
+
 def takeCommand():
     r=sr.Recognizer()
     with sr.Microphone() as source:
-        r.pause_threshold =  0.6  #default pause_threshold jis 0.8
+        r.pause_threshold =  0.8  #default pause_threshold jis 0.8
         audio = r.listen(source)
         try:
             query=r.recognize_google(audio, language="en-in")
@@ -44,7 +71,7 @@ def get_weather_forecast(location):
         say("Sorry, I couldn't retrieve the weather information.")
 
 
-def print_hi(name):
+def print_hi(name):git 
     # Use a breakpoint in the code line below to debug your script.
     print(f"Hi, {name}")  # Press Ctrl+F8 to toggle the breakpoint.
 
@@ -93,12 +120,20 @@ while 1:
         say(f"Sir, the time is {strfTime}")
 
 
-    elif "weather" in text:
+    elif "weather" in text.lower():
         say("Sure, please provide the location.")
         print("Listenning for entry into weather")
         location = takeCommand()
         get_weather_forecast(location)
-
+    elif "use artificial intelligence".lower() in text.lower():
+        print("starting open ai model")
+        print("you can start your query")
+        message=takeCommand()
+        if message==" sorry  from Friday, some error occurred ":
+            say("sorry , query not reached")
+            print("sorry , query not reached")
+        else:
+            ai(message)
 
 
     # elif "open word".lower() in text.lower():

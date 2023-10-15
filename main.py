@@ -66,12 +66,35 @@ def get_weather_forecast(location):
 
     if "weather" in weather_data:
         description = weather_data["weather"][0]["description"]
+
+        main=weather_data['main']
+        temperature= main['temp']
+        pressure=main['pressure']
+        humidity=main['humidity']
+
+        visibility=weather_data['visibility']
+
+        wind=weather_data["wind"]
+        wind_speed=wind['speed']
+        wind_direction=wind['deg']
+        cloudiness=weather_data["clouds"]['all']
         say(f"The weather in {location} is {description}.")
+        say(f"The temperature is {temperature-273} Celcius ,the pressure is {pressure}  Hectopascals ,and humidity is {humidity} percent")
+
+        print("Do you want to know more details?")
+        say("Do you want to know more details?")
+        print("Listenting for YES or NO..")
+        answer=takeCommand()
+        if ("yes" or "yup" or "ofcourse") in answer.lower():
+            say(f"the visibilty is {visibility} metres,wind speed is {wind_speed} metres per second {wind_direction} degrees (°) from true north and the cloudiness is {cloudiness} percent")
+        else :
+            say("Have a good day ,sir")
+
     else:
         say("Sorry, I couldn't retrieve the weather information.")
 
 
-def print_hi(name):git 
+def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
     print(f"Hi, {name}")  # Press Ctrl+F8 to toggle the breakpoint.
 
@@ -122,7 +145,7 @@ while 1:
 
     elif "weather" in text.lower():
         say("Sure, please provide the location.")
-        print("Listenning for entry into weather")
+        print("Listening for entry into weather...")
         location = takeCommand()
         get_weather_forecast(location)
     elif "use artificial intelligence".lower() in text.lower():

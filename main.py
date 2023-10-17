@@ -7,7 +7,7 @@ import subprocess  # subprocess.call
 # Press Shift+F10 to execute it or replace it with your code.
 # Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
 import speech_recognition as sr
-import os
+import os #used for MAC
 import win32com.client
 from gtts import gTTS
 speaker=win32com.client.Dispatch("SAPI.SpVoice")
@@ -24,32 +24,28 @@ def say(text):
     # #os.remove('output.mp3')
     #os.system(f"say {text}")
 
+conversation_history=[]
 def ai(message):
+    global conversation_history
+    conversation_history.append({"role":"user","content":message})
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=[
-            {
-                "role": "user",
-                "content": message
-            },
-            {
-                "role": "assistant",
-                "content": "Hi there! How can I assist you today?"
-            }
-        ],
+        messages=conversation_history,
         temperature=1,
         max_tokens=256,
         top_p=1,
         frequency_penalty=0,
         presence_penalty=0
     )
-    print(response["choices"][0]["message"]["content"])
-    say(response["choices"][0]["message"]["content"])
+    reply = response["choices"][0]["message"]["content"]
+    conversation_history.append({"role": "assistant", "content": reply})
+    print(reply)
+    say(reply)
 
 def takeCommand():
-    r=sr.Recognizer()
+    r = sr.Recognizer()
     with sr.Microphone() as source:
-        r.pause_threshold =  0.8  #default pause_threshold jis 0.8
+        r.pause_threshold = 0.8  #default pause_threshold jis 0.8
         audio = r.listen(source)
         try:
             query=r.recognize_google(audio, language="en-in")
@@ -85,9 +81,9 @@ def get_weather_forecast(location):
         say("Do you want to know more details?")
         print("Listenting for YES or NO..")
         answer=takeCommand()
-        if ("yes" or "yup" or "ofcourse") in answer.lower():
+        if "yes" in answer.lower() or "yup" in answer.lower() or "of course" in answer.lower():
             say(f"the visibilty is {visibility} metres,wind speed is {wind_speed} metres per second {wind_direction} degrees (°) from true north and the cloudiness is {cloudiness} percent")
-        else :
+        else:
             say("Have a good day ,sir")
 
     else:
@@ -151,13 +147,27 @@ while 1:
     elif "use artificial intelligence".lower() in text.lower():
         print("starting open ai model")
         print("you can start your query")
+        print("Listening for your query...")
         message=takeCommand()
         if message==" sorry  from Friday, some error occurred ":
             say("sorry , query not reached")
             print("sorry , query not reached")
+
         else:
             ai(message)
+            print("enter 'Y' or 'y'  if you want to continue the conversation otherwise 'N' or 'n' : ")
+            a = input() #variable for yes or no
+            while a == 'Y' or a == 'y':
+                print("Listening for your query...")
+                message=takeCommand()
+                if message == " sorry  from Friday, some error occurred ":
+                    say("sorry , query not reached")
+                    print("sorry , query not reached")
 
+                else:
+                    ai(message)
+                print("enter 'Y' or 'y'  if you want to continue the conversation otherwise 'N' or 'n' : ")
+                a = input()
 
     # elif "open word".lower() in text.lower():
     #
